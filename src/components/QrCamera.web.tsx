@@ -38,6 +38,8 @@ export function QrCamera({
         return;
       }
 
+      video.muted = true;
+      video.playsInline = true;
       video.srcObject = stream;
       await video.play();
 
@@ -104,6 +106,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderRadius: 18,
     backgroundColor: '#15212c',
+    position: 'relative',
   },
   video: {
     height: '100%',

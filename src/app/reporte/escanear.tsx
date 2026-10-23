@@ -22,6 +22,7 @@ export default function ScanClassroomScreen() {
   const [manualCode, setManualCode] = useState(draft.aula);
   const [scanned, setScanned] = useState(false);
   const [scannerError, setScannerError] = useState<string | null>(null);
+  const [cameraEnabled, setCameraEnabled] = useState(false);
 
   const complete = useCallback((code: string) => {
     const value = code.trim();
@@ -56,20 +57,23 @@ export default function ScanClassroomScreen() {
   }
 
   return (
-    <Screen>
+    <Screen key={cameraEnabled ? 'camera-enabled' : 'camera-disabled'}>
       <Eyebrow>Nuevo reporte · aula</Eyebrow>
       <Heading subtitle="El QR solo se lee después de que elijas continuar. También podés escribir el aula.">
         Escanear el QR
       </Heading>
 
-      {permission.permission?.granted ? (
+      {permission.permission?.granted && cameraEnabled ? (
         <QrCamera onScanned={handleScan} onError={handleScannerError} />
       ) : (
         <PermissionPrompt
           resource="camara"
           permissionState={permission}
           description="Usamos la cámara para leer el QR del aula. Al tocar Continuar, la cámara se abre aquí; no se graba audio ni video."
-          onGranted={() => undefined}
+          onGranted={() => {
+            setScannerError(null);
+            setCameraEnabled(true);
+          }}
           onSettings={() => {
             void openSettings();
           }}

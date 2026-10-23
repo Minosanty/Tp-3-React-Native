@@ -4,8 +4,12 @@ import * as Notifications from 'expo-notifications';
 export async function ensureReportNotificationChannel() {
   if (Platform.OS !== 'android') return;
 
-  await Notifications.setNotificationChannelAsync('reportes', {
-    name: 'Avisos de reportes',
-    importance: Notifications.AndroidImportance.DEFAULT,
-  });
+  try {
+    await Notifications.setNotificationChannelAsync('reportes', {
+      name: 'Avisos de reportes',
+      importance: Notifications.AndroidImportance.DEFAULT,
+    });
+  } catch (error) {
+    console.warn('No se pudo configurar el canal de notificaciones:', error);
+  }
 }

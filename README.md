@@ -1,10 +1,10 @@
 # Mantenimiento IPF
 
-Aplicación móvil para reportar desperfectos del edificio del Instituto Politécnico Formosa. Está implementada con React Native, Expo SDK 57, TypeScript y Expo Router. La app aplica mínimo privilegio: solicita cada permiso cuando se inicia la función que lo necesita, muestra una explicación propia antes del diálogo del sistema y conserva alternativas si la persona lo deniega.
+Aplicación móvil para reportar desperfectos del edificio del Instituto Politécnico Formosa. Está implementada con React Native, Expo SDK 58, TypeScript y Expo Router. La app aplica mínimo privilegio: solicita cada permiso cuando se inicia la función que lo necesita, muestra una explicación propia antes del diálogo del sistema y conserva alternativas si la persona lo deniega.
 
 ## Requisitos
 
-- Node.js LTS compatible con Expo SDK 57 y npm.
+- Node.js LTS compatible con Expo SDK 58 y npm.
 - Android Studio y un emulador/dispositivo Android para probar cámara, ubicación y notificaciones.
 - Para compilar iOS, macOS con Xcode o un servicio de build remoto.
 
@@ -12,17 +12,14 @@ Aplicación móvil para reportar desperfectos del edificio del Instituto Polité
 
 ```sh
 npm ci
-npm start
+npm run android
 ```
 
-Escaneá el QR con Expo Go para probar navegación, formularios y alternativas. Expo Go no usa los textos ni el manifiesto de permisos de esta app. Para validar los permisos reales, creá una development build:
+La app usa módulos nativos de SDK 58 para cámara, ubicación y notificaciones, así que en Android hay que instalar primero la development build con `npm run android`. Este comando compila e instala la app y puede dejar Metro iniciado; requiere Android Studio, un dispositivo o emulador y un JDK configurado. Para iniciar Metro después, ejecutá `npm start` y abrí la app Mantenimiento IPF instalada, no Expo Go. Si cambia una dependencia nativa o un plugin, volvé a compilar e instalar la build.
 
-```sh
-npx expo prebuild --platform android
-npx expo run:android
-```
+Expo Go no contiene necesariamente todos los módulos nativos que requiere esta versión de la app y puede mostrar errores como `Cannot find native module 'ExpoTopicSubscriptionModule'`. La build propia incluye esos módulos y conserva los textos y permisos configurados para la app.
 
-En iOS, ejecutá `npx expo prebuild --platform ios` y compilá con Xcode en macOS. Después de cambiar un plugin o los textos de propósito hay que crear una build nueva: una actualización OTA no modifica el manifiesto Android ni el `Info.plist`.
+En iOS, ejecutá `npx expo run:ios` y compilá con Xcode en macOS. Después de cambiar un plugin o los textos de propósito hay que crear una build nueva: una actualización OTA no modifica el manifiesto Android ni el `Info.plist`.
 
 Comandos disponibles:
 

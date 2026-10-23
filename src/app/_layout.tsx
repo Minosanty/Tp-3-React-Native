@@ -1,15 +1,23 @@
+import '@/lib/polyfills';
 import { Stack } from 'expo-router';
 import * as Notifications from 'expo-notifications';
 import { AppProvider } from '@/context/AppContext';
+import { Platform } from 'react-native';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+if (Platform.OS !== 'web') {
+  try {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+  } catch (err) {
+    console.warn('Notification handler not configured:', err);
+  }
+}
 
 function AppRoutes() {
   return (

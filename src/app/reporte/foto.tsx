@@ -1,5 +1,4 @@
 import { useRouter } from 'expo-router';
-import { CameraView } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { useRef, useState } from 'react';
 import { Alert, Text, View } from 'react-native';
@@ -14,13 +13,15 @@ import {
 } from '@/components/ui';
 import { useAppData } from '@/context/AppContext';
 import { usePermiso } from '@/hooks/usePermiso';
+import { PhotoCamera, PhotoCameraRef } from '@/components/PhotoCamera';
 
 export default function ReportPhotoScreen() {
   const router = useRouter();
-  const camera = useRef<CameraView>(null);
+  const camera = useRef<PhotoCameraRef>(null);
   const permission = usePermiso('camara');
   const { setDraft } = useAppData();
   const [busy, setBusy] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
 
   async function chooseFromLibrary() {
     setBusy(true);
@@ -35,7 +36,10 @@ export default function ReportPhotoScreen() {
       setDraft({ imageUri: uri });
       router.back();
     } catch (error) {
-      Alert.alert('No se pudo seleccionar la foto', error instanceof Error ? error.message : 'Intentá nuevamente.');
+      Alert.alert(
+        'No se pudo seleccionar la foto',
+        error instanceof Error ? error.message : 'Intentá nuevamente.',
+      );
     } finally {
       setBusy(false);
     }
@@ -43,17 +47,24 @@ export default function ReportPhotoScreen() {
 
   async function takePhoto() {
     if (!camera.current) {
-      Alert.alert('Cámara no disponible', 'Probá nuevamente o elegí una foto de la galería.');
+      Alert.alert(
+        'Cámara no disponible',
+        'Probá nuevamente o elegí una foto de la galería.',
+      );
       return;
     }
     setBusy(true);
+    setCameraError(null);
     try {
-      const result = await camera.current.takePictureAsync({ quality: 0.85 });
+      const result = await camera.current.takePictureAsync();
       if (!result?.uri) throw new Error('La cámara no devolvió una imagen.');
       setDraft({ imageUri: result.uri });
       router.back();
     } catch (error) {
-      Alert.alert('No se pudo sacar la foto', error instanceof Error ? error.message : 'Intentá nuevamente.');
+      const message =
+        error instanceof Error ? error.message : 'Intentá nuevamente.';
+      setCameraError(message);
+      Alert.alert('No se pudo sacar la foto', message);
     } finally {
       setBusy(false);
     }
@@ -78,12 +89,14 @@ export default function ReportPhotoScreen() {
       </ActionButton>
 
       {permission.permission?.granted ? (
-        <View style={{ overflow: 'hidden', borderRadius: 18, backgroundColor: '#15212c' }}>
-          <CameraView ref={camera} style={{ height: 330, width: '100%' }} facing="back" />
+        <View style={{ gap: 8 }}>
+          <PhotoCamera ref={camera} onError={setCameraError} />
         </View>
       ) : (
         <Card>
-          <Text style={{ color: colors.ink, fontSize: 15, fontWeight: '700' }}>Elegir una foto no requiere permiso</Text>
+          <Text style={{ color: colors.ink, fontSize: 15, fontWeight: '700' }}>
+            Elegir una foto no requiere permiso
+          </Text>
           <Text style={{ color: colors.muted, fontSize: 14, lineHeight: 20 }}>
             Solo se pedirá acceso a la cámara si elegís sacar una foto ahora.
           </Text>
@@ -91,18 +104,24 @@ export default function ReportPhotoScreen() {
       )}
 
       {permission.error ? <InlineError>{permission.error}</InlineError> : null}
+      {cameraError ? <InlineError>{cameraError}</InlineError> : null}
+
       {!permission.permission?.granted ? (
         <ActionButton onPress={requestCamera} variant="secondary">
           Explicar y continuar con la cámara
         </ActionButton>
       ) : (
-        <ActionButton onPress={takePhoto} disabled={busy}>Sacar foto</ActionButton>
+        <ActionButton onPress={takePhoto} disabled={busy}>
+          {busy ? 'Guardando foto…' : 'Sacar foto'}
+        </ActionButton>
       )}
 
       <Text style={{ color: colors.muted, fontSize: 13, lineHeight: 19 }}>
         La elección o captura es opcional; podés enviar el reporte sin foto.
       </Text>
-      <ActionButton onPress={() => router.back()} variant="quiet">Volver al formulario</ActionButton>
+      <ActionButton onPress={() => router.back()} variant="quiet">
+        Volver al formulario
+      </ActionButton>
     </Screen>
   );
 }
